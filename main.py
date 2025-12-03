@@ -28,42 +28,29 @@
 
 import streamlit as st
 import fitz  # PyMuPDF
-from bot import chat   # your Groq chat function
 
-st.set_page_config(page_title="PDF Chatbot", layout="centered")
+st.set_page_config(page_title="PDF Text Extractor", layout="wide")
 
-st.title("PDF → Chatbot using Groq")
-st.write("Upload a PDF and ask questions based on its content.")
+st.title(" PDF Text Extractor")
+st.write("Upload a PDF and extract all text instantly — no chatbot used.")
 
 uploaded_file = st.file_uploader("Upload PDF", type=["pdf"])
 
-pdf_text = ""
-
 if uploaded_file:
-    # Read PDF
     doc = fitz.open(stream=uploaded_file.read(), filetype="pdf")
+    pdf_text = ""
+
     for page in doc:
         pdf_text += page.get_text()
 
-    st.success("PDF uploaded and text extracted successfully!")
+    st.success("PDF text extracted successfully! 🎉")
 
-    # Chat section
-    query = st.text_input("Ask something from the PDF:")
+    st.subheader(" Extracted Text:")
+    st.text_area("", pdf_text, height=400)
 
-    if st.button("Ask"):
-        if query.strip():
-            prompt = f"""
-            You are an assistant. Answer the question using ONLY the PDF content below.
-
-            PDF Content:
-            {pdf_text[:8000]}
-
-            Question: {query}
-
-            If answer not found, reply: 'Not available in the PDF.'
-            """
-            response = chat(prompt)
-            st.write("**Answer:**")
-            st.write(response)
-        else:
-            st.warning("Please enter a question!")
+    st.download_button(
+        label=" Download Extracted Text",
+        data=pdf_text,
+        file_name="extracted_text.txt",
+        mime="text/plain"
+    )
